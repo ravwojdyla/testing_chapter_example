@@ -40,8 +40,10 @@ class AvgPrice:
 
     @staticmethod
     def run(argv=None):
+        import os
+        d = os.path.dirname(os.path.realpath(__file__))
         parser = argparse.ArgumentParser()
-        parser.add_argument("--input", dest="input", default="/tmp/auctions.txt")
+        parser.add_argument("--input", dest="input", default=os.path.join(d, "data", "auctions.txt"))
         parser.add_argument("--output", dest="output", required=True)
         known_args, pipeline_args = parser.parse_known_args(argv)
         pipeline_args.extend(
