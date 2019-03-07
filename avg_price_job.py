@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import argparse
 import logging
+import string
 
 import apache_beam as beam
 from apache_beam.io import ReadFromText
@@ -25,6 +26,19 @@ class AvgPrice:
         return name, sum / count
 
     @staticmethod
+    def format_artis(text_artist_name):
+        return text_artist_name.strip().lower()
+
+    @staticmethod
+    def computeAvgPerKey(pcol):
+        return (
+            pcol
+            | "PairWithOne" >> beam.Map(lambda x: (x[0], (x[1], 1)))
+            | "GroupAndSum" >> beam.CombinePerKey(AvgPrice.add)
+            | "Avg" >> beam.Map(AvgPrice.avg)
+        )
+
+    @staticmethod
     def run(argv=None):
         parser = argparse.ArgumentParser()
         parser.add_argument("--input", dest="input", default="/tmp/auctions.txt")
@@ -44,7 +58,7 @@ class AvgPrice:
 
             lines = p | ReadFromText(known_args.input)
 
-            counts = (
+            data = (
                 lines
                 | "Split"
                 >> (
@@ -52,11 +66,11 @@ class AvgPrice:
                         beam.typehints.Tuple[str, str]
                     )
                 )
-                | "Clean" >> beam.Map(lambda x: (x[0].strip(), int(x[1].strip())))
-                | "PairWithOne" >> beam.Map(lambda x: (x[0], (x[1], 1)))
-                | "GroupAndSum" >> beam.CombinePerKey(AvgPrice.add)
-                | "Avg" >> beam.Map(AvgPrice.avg)
+                | "Clean"
+                >> beam.Map(lambda x: (AvgPrice.format_artis(x[0]), int(x[1].strip())))
             )
+
+            counts = AvgPrice.computeAvgPerKey(data)
 
             def format_result(word_count):
                 (word, count) = word_count

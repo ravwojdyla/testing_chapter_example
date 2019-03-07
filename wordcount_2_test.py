@@ -5,12 +5,12 @@ import re
 import tempfile
 import unittest
 
-from avg_price import AvgPrice
+from avg_price_job import AvgPrice
 from apache_beam.testing.util import open_shards
 
 
 class AvgPriceIT(unittest.TestCase):
-    SAMPLE_TEXT = "Mark Rothko\t1000\nMark Rothko\t500\nABC\t100"
+    SAMPLE_DATA = "Mark Rothko\t1000\nMark Rothko\t500\nABC\t100"
 
     def create_temp_file(self, contents):
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -18,10 +18,9 @@ class AvgPriceIT(unittest.TestCase):
             return f.name
 
     def test_basics(self):
-        temp_path = self.create_temp_file(self.SAMPLE_TEXT)
-        expected_words = [("ABC", 100), ("Rothko", 750)]
+        temp_path = self.create_temp_file(self.SAMPLE_DATA)
+        expected_words = [("abc", 100), ("rothko", 750)]
         AvgPrice.run(["--input=%s*" % temp_path, "--output=%s.result" % temp_path])
-        # Parse result file and compare.
         results = []
         with open_shards(temp_path + ".result-*-of-*") as result_file:
             for line in result_file:

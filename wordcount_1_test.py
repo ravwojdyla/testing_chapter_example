@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import unittest
 
-from avg_price import AvgPrice
+from avg_price_job import AvgPrice
 
 
 class AvgPriceUnitTest(unittest.TestCase):

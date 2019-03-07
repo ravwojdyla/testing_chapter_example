@@ -2,14 +2,13 @@ from __future__ import absolute_import
 
 import unittest
 
-from hypothesis import given, reproduce_failure
-from hypothesis.strategies import text, lists, tuples, integers
+from hypothesis import given, reproduce_failure, assume
+import hypothesis.strategies as st
 
-from avg_price import AvgPrice
+from avg_price_job import AvgPrice
 
 
 class AvgPriceUnitTest(unittest.TestCase):
-
-    @given(lists(tuples(text(), tuples(integers(min_value=0), integers(min_value=0)))))
-    def test_avg(self, s):
-        result = [AvgPrice.avg(x) for x in s]
+    @given(st.text())
+    def test_format(self, s):
+        assert AvgPrice.format_artis(s).islower()
